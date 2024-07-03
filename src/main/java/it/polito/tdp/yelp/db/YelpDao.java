@@ -13,13 +13,16 @@ import it.polito.tdp.yelp.model.User;
 public class YelpDao {
 	
 	
-	public List<Business> getAllBusiness(){
-		String sql = "SELECT * FROM Business";
+	public List<Business> getBusiness(String c){
+		String sql = "SELECT b.* "
+				+ "FROM business b "
+				+ "WHERE b.city = ? ";
 		List<Business> result = new ArrayList<Business>();
 		Connection conn = DBConnect.getConnection();
 
 		try {
 			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, c);
 			ResultSet res = st.executeQuery();
 			while (res.next()) {
 
@@ -99,6 +102,65 @@ public class YelpDao {
 						res.getInt("review_count"));
 				
 				result.add(user);
+			}
+			res.close();
+			st.close();
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public List<String> getCities(){
+		String sql = "SELECT distinct b.city "
+				+ "FROM business b ";
+		List<String> result = new ArrayList<>();
+
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+				result.add(res.getString("city"));
+			}
+			res.close();
+			st.close();
+			conn.close();
+			return result;
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		}
+	
+	public List<Review> getReviews(Business b){
+		String sql = "SELECT r.* "
+				+ "FROM reviews r "
+				+ "WHERE r.business_id = ?";
+		
+		List<Review> result = new ArrayList<Review>();
+		Connection conn = DBConnect.getConnection();
+
+		try {
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, b.getBusinessId());
+			ResultSet res = st.executeQuery();
+			while (res.next()) {
+
+				Review review = new Review(res.getString("review_id"), 
+						res.getString("business_id"),
+						res.getString("user_id"),
+						res.getDouble("stars"),
+						res.getDate("review_date").toLocalDate(),
+						res.getInt("votes_funny"),
+						res.getInt("votes_useful"),
+						res.getInt("votes_cool"),
+						res.getString("review_text"));
+				result.add(review);
 			}
 			res.close();
 			st.close();

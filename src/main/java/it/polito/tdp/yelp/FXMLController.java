@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.yelp.model.ArchiUscenti;
 import it.polito.tdp.yelp.model.Business;
 import it.polito.tdp.yelp.model.Model;
 import it.polito.tdp.yelp.model.Review;
@@ -48,13 +49,27 @@ public class FXMLController {
     	this.cmbLocale.getItems().clear();
     	String citta = this.cmbCitta.getValue();
     	if(citta != null) {
-    		//TODO popolare la tendina dei locali per la città selezionata
+    		cmbLocale.getItems().addAll(model.getBusinesses(citta));
     		
     	}
     }
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	Business locale =cmbLocale.getValue();
+    	if (locale.equals(null)) {
+    		txtResult.setText("Scegli un locale");
+    		return;
+    	}
+    	txtResult.appendText("Grafo"+"\n");
+    	model.creaGrafo(locale);
+    	txtResult.appendText("Vertici: "+ model.getV()+"\n");
+    	txtResult.appendText("Archi: "+ model.getA()+"\n");
+    	
+    	List<ArchiUscenti> lista = model.trovaMaxUscenti();
+    	for (ArchiUscenti a : lista) {
+    		txtResult.appendText(a+ "\n");
+    	}
     	
     }
 
@@ -75,5 +90,6 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	cmbCitta.getItems().addAll(model.getCities());
     }
 }
